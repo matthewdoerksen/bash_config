@@ -1,0 +1,84 @@
+alias bltdir='cd ~/blt/app/main/core'
+alias bltsync='blt --sync'
+alias blteclipse='bltdir; blt --eclipse'
+alias bltdb='bltdir; blt --build post --db-start --build plsql'
+alias bltstart='bltdir; blt --start'
+
+function blte {
+  grepCount=$(ps -aef | grep -c bltsync);
+  if [ ${grepCount} -ge 2 ]; then
+   echo "A sync is currently in progress, NOT opening Eclipse."
+    return 1
+  fi
+
+  grepCount=$(ps -aef | grep -c eclipse.sh);
+  count=0
+  sleepDur=2 # sleep duration (seconds)
+  isDone=0 # change to 1 if we succeed (don't find eclipse running)
+  while [ $count -lt 10 ] && [ $isDone -ne 1 ]; do
+    if [ $grepCount -ge 2 ]; then
+      echo "Eclipse is already open, sleeping for ${sleepDur} seconds before rechecking."
+      sleep $sleepDur
+      count=$((count+1))
+    else
+      isDone=1
+    fi
+  done
+
+  if [ $isDone -eq 0 ]; then
+    echo "Eclipse is already open. Please close it before attempting to run blte (blt --eclipse)."
+    return 1
+  fi
+
+  # open eclipse
+  echo "Eclipse is not running, opening eclipse."
+  blteclipse
+}
+
+function sync {
+  grepCount=$(ps -aef | grep -c bltsync);
+  if [ ${grepCount} -ge 2 ]; then
+    echo "Sync is already in progress, aborting."
+    return 1
+  else
+    echo "Sync doesn't appear to be running, checking if eclipse is open."
+    grepCount=$(ps -aef | grep -c eclipse.sh);
+    if [ ${grepCount} -ge 2 ]; then
+      echo "Eclipse is still running; please close it before syncing."
+      return 1
+    else
+      echo "Eclipse wasn't running. Time to sync with blt; this may take a while."
+      bltsync
+      return 0
+    fi
+  fi
+}
+
+#alias bltbuild='blt --build' ## DO NOT run while in eclipse
+alias bltupdate='blt --update-blt --setup --config force'
+#alias bltclean='blt --clean-all force --status --sync --build'
+
+alias dupes='cd ~/blt/app/main/core/build; ./ant dupe-class-finder'
+
+alias gs='git status'
+function gbn() {
+  git branch $1
+  git checkout $1
+}
+alias gb='git branch'
+alias gc='git checkout'
+alias gd='git diff'
+
+function gpo() {
+  confirmArg=$1
+  if [ "$confirmArg" == "-y" ]; then
+    branchName=$(gb | grep "* " | cut -d'*' -f2)
+    echo "Pushing changes to GitHub under branch: $branchName"
+    git push origin $branchName
+  elif [ "$confirmArg" != "-y" ]; then
+    echo "You must add -y to the gpo command in order to push changes automatically."
+  fi
+}
+
+alias core='cd ~/blt/app/main/core'
+
