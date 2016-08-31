@@ -1,8 +1,30 @@
-alias bltdir='cd ~/blt/app/main/core'
+export BRANCH_DIR='main/core'
+
+alias bltdir='cd ~/blt/app/${BRANCH_DIR}'
 alias bltsync='blt --sync'
 alias blteclipse='bltdir; blt --eclipse'
 alias bltdb='bltdir; blt --build post --db-start --build plsql'
 alias bltstart='bltdir; blt --start'
+alias bltupdate='blt --update-blt --setup --config force'
+
+alias core='cd ~/blt/app/main/core'
+alias updaterepo='cd ~/blt/app/${BRANCH_DIR}/build; blt --build update-repository-filter'
+alias dupes='cd ~/blt/app/${BRANCH_DIR}/build; ./ant dupe-class-finder'
+
+alias gs='git status'
+alias gb='git branch'
+alias gc='git checkout'
+alias gd='git diff'
+
+alias runselectedftest='cd ~/blt/app/main/core/build; blt --build remote.miniftest -DdoSubmit=false -Dchange=$1';
+
+function resetBranchDir {
+  export BRANCH_DIR='main/core'
+}
+
+function setBranchDir {
+  export BRANCH_DIR=$1
+}
 
 function blte {
   grepCount=$(ps -aef | grep -c bltsync);
@@ -54,20 +76,10 @@ function sync {
   fi
 }
 
-#alias bltbuild='blt --build' ## DO NOT run while in eclipse
-alias bltupdate='blt --update-blt --setup --config force'
-#alias bltclean='blt --clean-all force --status --sync --build'
-
-alias dupes='cd ~/blt/app/main/core/build; ./ant dupe-class-finder'
-
-alias gs='git status'
 function gbn() {
   git branch $1
   git checkout $1
 }
-alias gb='git branch'
-alias gc='git checkout'
-alias gd='git diff'
 
 function gpo() {
   confirmArg=$1
@@ -80,5 +92,28 @@ function gpo() {
   fi
 }
 
-alias core='cd ~/blt/app/main/core'
+function localprecheckin(){
+  changeList=$1
+  submitCL=$2
+  if [ -z "$changeList" ]; then
+    echo "A changelist # must be specified as the first argument"
+  else
+    if [ "$submitCL" == "-y" ]; then
+      echo "Running local precheckin (with submit) for CL#$changeList"
+      blt --submit $changeList local
+    else
+      echo "Running local precheckin (no submit) for CL#$changeList"
+      blt --submit $changeList local nosubmit
+    fi
+  fi
+}
 
+function autobuild() {
+  changeList=$1
+  if [ -z "$changeList" ]; then
+    echo "A changelist # must be specified as the first argument"
+  else
+    echo "Running remote ftest for CL#$changeList"
+    runselectedftest
+  fi
+}
