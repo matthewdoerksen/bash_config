@@ -1,3 +1,6 @@
+# put timestamps on the history command
+export HISTTIMEFORMAT='%F %T '
+
 export BRANCH_DIR='main/core'
 export IDE='intellij'
 #export IDE='eclipse'
