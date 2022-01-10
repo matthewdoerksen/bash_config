@@ -2,23 +2,24 @@
 export HISTTIMEFORMAT='%F %T '
 
 export BRANCH_DIR='main/core'
-export IDE='intellij'
-#export IDE='eclipse'
+#export IDE='intellij'
+export IDE='eclipse'
 
 function resetIde {
-  export IDE='intellij'
+  export IDE='eclipse'
+  #export IDE='intellij'
 }
 
 function setIde {
   export IDE=$1
 }
 
-alias bltdir='cd ~/blt/app/${BRANCH_DIR}'
-alias bltsync='blt --sync'
-alias bltidea='bltdir; blt --intellij'
-alias blteclipse='bltdir; blt --eclipse'
-alias bltdb='bltdir; blt --build post --db-start --build plsql'
-alias bltstart='bltdir; blt --start'
+alias coredir='cd ~/blt/app/${BRANCH_DIR}'
+alias coresync='corecli core:sync'
+alias coreidea='coredir; corecli --intellij'
+alias coreeclipse='coredir; corecli --eclipse'
+alias coredb='coredir; corecli --build post --db-start --build plsql'
+alias corestart='coredir; corecli --start'
 
 function resetBranchDir {
   export BRANCH_DIR='main/core'
@@ -28,8 +29,8 @@ function setBranchDir {
   export BRANCH_DIR=$1
 }
 
-function bltide {
-  grepCount=$(ps -aef | grep -c bltsync);
+function coreide {
+  grepCount=$(ps -aef | grep -c coresync);
   if [ ${grepCount} -ge 2 ]; then
    echo "A sync is currently in progress, NOT opening Eclipse/IntelliJ."
     return 1
@@ -58,14 +59,14 @@ function bltide {
   done
 
   if [ $isDone -eq 0 ]; then
-    echo "IDE is already open. Please close it before attempting to run blte/blti (blt --eclipse, or blt --intellij)."
+    echo "IDE is already open. Please close it before attempting to run blte/blti (corecli --eclipse, or corecli --intellij)."
     return 1
   fi
 
   if [ $IDE == "intellij" ]; then
-    bltidea
+    coreidea
   elif [ $IDE == "eclipse" ]; then
-    blteclipse
+    coreeclipse
   else
     echo "Invalid IDE detected, exiting."
     exit 1
@@ -73,7 +74,7 @@ function bltide {
 }
 
 function sync {
-  grepCount=$(ps -aef | grep -c bltsync);
+  grepCount=$(ps -aef | grep -c coresync);
   if [ ${grepCount} -ge 2 ]; then
     echo "Sync is already in progress, aborting."
     return 1
@@ -93,16 +94,13 @@ function sync {
       return 1
     else
       echo "IDE wasn't running. Time to sync with blt; this may take a while."
-      bltsync
+      coresync
     fi
   fi
 }
 
-alias all='sync --build && idea'
-#alias bltbuild='blt --build' ## DO NOT run while in eclipse
-alias bltupdate='blt --update-blt --setup --config force'
-#alias bltclean='blt --clean-all force --status --sync --build'
-alias updaterepo='cd ~/blt/app/${BRANCH_DIR}/build; blt --build update-repository-filter'
+alias all='corecli core:sync && corecli core:build --pre && coreide'
+alias updaterepo='cd ~/blt/app/${BRANCH_DIR}/build; corecli mvn:go-offline --pre'
 
 alias dupes='cd ~/blt/app/${BRANCH_DIR}/build; ./ant dupe-class-finder'
 
@@ -150,7 +148,7 @@ function localprecheckin(){
   fi
 }
 
-alias runselectedftest='cd ~/blt/app/main/core/build; blt --build remote.miniftest -DdoSubmit=false -Dchange=$1';
+alias runselectedftest='coredir; corecli core:ant remote.miniftest -DdoSubmit=false -Dchange=$1 -DbrowserType=$2';
 
 function autobuild() {
   changeList=$1
