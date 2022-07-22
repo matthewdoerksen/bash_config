@@ -1,3 +1,7 @@
+function gc{
+	git checkout $args
+}
+
 function gs{
 	git status
 }
@@ -19,14 +23,11 @@ function gb{
 	git branch
 }
 
-function gc{
-	git checkout $args
-}
-
 function gpo() {
 	$confirmArg=$args[0]
 	if ( $confirmArg -eq "-y" ) {
-		$branchName=$(git branch | grep "* " | cut -d'*' -f2)
+            $branchName1=$(git branch | select-string -Pattern "\* ")
+		$branchName=$branchName1.Line.Split('* ')[1]
 		echo "Pushing changes to GitHub under branch: $branchName"
 		git push origin $branchName
 	}
