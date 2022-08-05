@@ -1,5 +1,9 @@
+function gcr{
+      git checkout --track $args[0]
+}
+
 function gc{
-	git checkout $args
+      git checkout $args[0]
 }
 
 function gs{
@@ -8,6 +12,7 @@ function gs{
 
 function gh{
 	cd C:\Users\mdoerksen.REDMOND\source\repos
+      cd $args[0]
 }
 
 function gd{
@@ -15,12 +20,36 @@ function gd{
 }
 
 function gbn{
-	git branch $args
-	git checkout $args
+	git branch $args[0]
+	git checkout $args[0]
 }
 
 function gb{
 	git branch
+}
+
+function dps{
+      if ( $args[0] -eq "" ) {
+        docker ps
+      } else {
+        docker ps $args[0]
+      }
+}
+
+function di{
+      docker images
+}
+
+function dl{
+      docker logs $args[0]
+}
+
+function dc{
+      docker container $args
+}
+
+function da{
+      docker attach $args[0]
 }
 
 function gpo() {
@@ -34,6 +63,13 @@ function gpo() {
 	elseif ( $confirmArg -ne "-y" ) {
 		echo "You must add -y to the gpo command in order to push changes automatically."
 	}
+}
+
+function dependencyscan() {
+    $path=Get-Location
+    $projectRootFolderName
+    $dropFolder="\Drop\Debug\x64\"
+    \\hillock\XboxShare\ShowDependencies.cmd
 }
 
 oh-my-posh --init --shell pwsh --config "C:\Users\mdoerksen.REDMOND\OneDrive/ -/ Microsoft\ohmyposh.json" | Invoke-Expression
