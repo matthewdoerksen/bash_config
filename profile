@@ -75,6 +75,7 @@ function dependencyscan() {
 function dnc() {
     dotnet nuget locals all --clear
     dotnet restore
+    dotnet build
 }
 
 oh-my-posh --init --shell pwsh --config "C:\Users\mdoerksen.REDMOND\OneDrive/ -/ Microsoft\ohmyposh.json" | Invoke-Expression
