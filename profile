@@ -72,5 +72,10 @@ function dependencyscan() {
     \\hillock\XboxShare\ShowDependencies.cmd
 }
 
+function dnc() {
+    dotnet nuget locals all --clear
+    dotnet restore
+}
+
 oh-my-posh --init --shell pwsh --config "C:\Users\mdoerksen.REDMOND\OneDrive/ -/ Microsoft\ohmyposh.json" | Invoke-Expression
 Import-Module -Name Terminal-Icons
