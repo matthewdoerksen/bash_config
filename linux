@@ -1,0 +1,86 @@
+#!/bin/bash
+
+function gcr(){
+      git checkout --track "$1"
+}
+
+function gc(){
+      git checkout "$1"
+}
+
+function gs(){
+        git status
+}
+
+function gh(){
+    cd /c/Users/mdoerksen/source/repos
+    cd "$1"
+}
+
+function gd(){
+        git diff
+}
+
+function gbn(){
+        git branch "$1"
+        git checkout "$1"
+}
+
+function gb(){
+        git branch
+}
+
+function dps(){
+      if [ -z "$1" ]; then
+        docker ps
+      else
+        docker ps $args[0]
+      fi
+}
+
+function di(){
+      docker images
+}
+
+function dl(){
+      docker logs "$1"
+}
+
+function dc(){
+      docker container "$@"
+}
+
+function da(){
+      docker attach "$1"
+}
+
+function gpo() {
+        $confirmArg="$1"
+        if [ "$confirmArg" == eq "-y" ]; then
+          branchName=$(git branch | grep '\* ' | awk '{print $2}')
+          echo "Pushing changes to GitHub under branch: $branchName"
+          git push origin "$branchName"
+        else
+          echo "You must add -y to the gpo command in order to push changes automatically."
+        fi
+}
+
+function dependencyscan() {
+  path=$(pwd)
+  projectRootFolderName
+  dropFolder="/Drop/Debug/x64/"
+  /hillock/XboxShare/ShowDependencies.cmd
+}
+
+function dna() {
+    dotnet clean
+    dotnet restore
+    dotnet build
+    dotnet test
+}
+
+function dnc() {
+    dotnet nuget locals all --clear
+    dotnet restore
+    dotnet build
+}
