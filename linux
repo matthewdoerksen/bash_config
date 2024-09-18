@@ -69,8 +69,8 @@ function da(){
 }
 
 function gpo() {
-        $confirmArg="$1"
-        if [ "$confirmArg" == eq "-y" ]; then
+        confirmArg="$1"
+        if [ "$confirmArg" == "-y" ]; then
           branchName=$(git branch | grep '\* ' | awk '{print $2}')
           echo "Pushing changes to GitHub under branch: $branchName"
           git push origin "$branchName"
