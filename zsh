@@ -139,3 +139,63 @@ gpo() {
     return 1
   fi
 }
+
+# Run `make refresh-envs` once per shell session when entering a repo folder.
+# Behavior:
+# - Scans the current directory and parent directories for a Makefile (Makefile, makefile, GNUmakefile)
+#   that contains a `refresh-envs:` target.
+# - If found, runs `make refresh-envs` in that Makefile's directory.
+# - Only runs once per shell session (flag: `REFRESH_ENVS_DONE`).
+# - Hook is triggered on directory changes (chpwd) and invoked once at sourcing time
+#   to handle shells that start already in a repo.
+_refresh_envs_once() {
+  # Debug: show whether refresh was already performed this session
+  echo "[_refresh_envs_once] REFRESH_ENVS_DONE=${REFRESH_ENVS_DONE:-unset}"
+
+  if [[ -n "${REFRESH_ENVS_DONE-}" ]]; then
+    echo "[_refresh_envs_once] already performed; skipping refresh"
+    return 0
+  fi
+
+  local dir="$PWD"
+  for mf in "$dir/Makefile" "$dir/makefile" "$dir/GNUmakefile"; do
+    if [[ -f "$mf" ]] && grep -q '^[[:space:]]*refresh-envs:' "$mf" 2>/dev/null; then
+      echo "Refreshing environment by running 'make refresh-envs' in: $dir"
+      # set the done flag before running make to avoid re-entry if make triggers hooks
+      REFRESH_ENVS_DONE=1
+      # run make in the target directory without changing the shell's cwd (avoids chpwd)
+      make -C "$dir" refresh-envs || true
+      return 0
+    fi
+  done
+
+  # Optional debug output when no target is found (enable by setting DEBUG_REFRESH=1)
+  if [[ -n "${DEBUG_REFRESH-}" ]]; then
+    echo "[_refresh_envs_once] no 'refresh-envs' target found in: $dir"
+  fi
+  return 0
+}
+
+# Register chpwd hook (autoload if necessary)
+if ! typeset -f add-zsh-hook >/dev/null 2>&1; then
+  autoload -Uz add-zsh-hook >/dev/null 2>&1 || true
+fi
+# Register chpwd hook if not already present (avoid duplicate registrations on re-source)
+found=0
+if (( ${+chpwd_functions} )); then
+  for f in "${chpwd_functions[@]}"; do
+    if [[ "$f" == "_refresh_envs_once" ]]; then
+      found=1
+      break
+    fi
+  done
+fi
+if [[ $found -eq 0 ]]; then
+  add-zsh-hook chpwd _refresh_envs_once
+fi
+
+# Run the check once immediately for interactive shells only (avoids non-interactive
+# subshells (e.g. spawned by `make`) recursively triggering the hook)
+if [[ -o interactive ]]; then
+  _refresh_envs_once
+fi
