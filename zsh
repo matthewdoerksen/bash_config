@@ -3,6 +3,8 @@
 # Save as ~/.zsh_functions and source from ~/.zshrc:
 #   if [[ -f ~/.zsh_functions ]]; then source ~/.zsh_functions; fi
 
+
+
 # Checkout a remote branch and track it locally
 gcr() {
   if [[ -z "$1" ]]; then
@@ -44,9 +46,27 @@ gc() {
 gs() { git status; }
 
 # Change to a repo folder under a configurable root.
-# Set `GITHUB_REPOS` env var to your repos root (default: ~/repos)
+# Set `DEV_REPO_ROOT` env var to your repos root (default: $HOME/dev/nu)
+# - `gh` with no args: cd to the repo root
+# - `gh <name>`: cd to "$DEV_REPO_ROOT/<name>"
 gh() {
-  cd "$HOME/repos"
+  base="${DEV_REPO_ROOT:-$HOME/dev/nu}"
+  if [[ -z "$1" ]]; then
+    if [[ -d "$base" ]]; then
+      cd "$base" || return 1
+    else
+      echo "Directory not found: $base"
+      return 1
+    fi
+  else
+    target="$base/$1"
+    if [[ -d "$target" ]]; then
+      cd "$target" || return 1
+    else
+      echo "Directory not found: $target"
+      return 1
+    fi
+  fi
 }
 
 # Git diff
